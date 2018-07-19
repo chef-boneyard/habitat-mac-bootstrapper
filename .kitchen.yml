@@ -1,0 +1,63 @@
+driver:
+  name: vagrant
+  forward_agent: yes
+  customize:
+    cpus: 4
+    memory: 4096
+  synced_folders:
+    - ['.', '/home/vagrant/habitat-mac-bootstrapper']
+    - ['../omnibus', '/home/vagrant/omnibus']
+    - ['../omnibus-software', '/home/vagrant/omnibus-software']
+
+provisioner:
+  name: chef_zero
+  require_chef_omnibus: latest
+  attributes:
+    vagrant:
+      this_key_exists_so_we_have_a_vagrant_key: true
+    omnibus:
+        build_user:          vagrant
+        build_user_group:    vagrant
+        build_user_password: vagrant
+
+platforms:
+  - name: centos-6.7
+    run_list: yum-epel::default
+  - name: centos-7.1
+    run_list: yum-epel::default
+  - name: freebsd-9.3
+    run_list:
+      - freebsd::portsnap
+      - freebsd::pkgng
+  - name: ubuntu-14.04
+    run_list: apt::default
+  - name: windows-2012r2
+    driver:
+      box: chef/windows-server-2012r2-standard
+      synced_folders:
+        - ['../..', '/vagrant/code']
+    provisioner:
+      attributes:
+        omnibus:
+          build_user:          vagrant
+          build_user_group:    Administrators
+          build_user_password: vagrant
+  - name: windows-2012r2-i386
+    driver:
+      box: chef/windows-server-2012r2-standard
+      synced_folders:
+        - ['../..', '/vagrant/code']
+    provisioner:
+      attributes:
+        omnibus:
+          build_user:          vagrant
+          build_user_group:    Administrators
+          build_user_password: vagrant
+
+suites:
+  - name: boothabitat-mac-bootstrapperpple
+    attributes:
+      omnibus:
+        install_dir: /opt/habitat-mac-bootstrapper
+    run_list:
+      - omnibus::default
